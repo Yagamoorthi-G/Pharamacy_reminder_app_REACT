@@ -1,0 +1,23 @@
+.container {
+  padding: 20px;
+}
+
+.card {
+  background: #fff;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+input {
+  padding: 6px;
+  margin: 4px 0;
+  width: 250px;
+}
+
+button {
+  padding: 6px 10px;
+  margin-top: 6px;
+  cursor: pointer;
+}

@@ -1,0 +1,234 @@
+:root {
+    --primary-green: #064e3b;
+    --accent-yellow: #facc15;
+    --bg-gray: #f3f4f6;
+    --white: #ffffff;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+    --danger-red: #ef4444;
+  }
+  
+  .page-container {
+    background-color: var(--bg-gray);
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .content-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .page-title {
+    color: var(--primary-green);
+    border-bottom: 3px solid var(--accent-yellow);
+    display: inline-block;
+    padding-bottom: 5px;
+    margin-bottom: 25px;
+  }
+  
+  /* SEARCH */
+  .search-container {
+    margin-bottom: 30px;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1);
+  }
+  
+  /* CARDS */
+  .stack-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .renewal-card {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s;
+    border-left-width: 6px;
+    border-left-style: solid;
+  }
+  
+  .renewal-card:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Priority Borders */
+  .card-overdue { border-left-color: var(--danger-red); }
+  .card-safe { border-left-color: var(--accent-yellow); } /* Yellow for due soon, or green if far out */
+  
+  /* Header */
+  .card-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: white;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .card-header:hover {
+    background: #f9fafb;
+  }
+  
+  .header-info h3 {
+    margin: 0 0 5px 0;
+    color: var(--primary-green);
+    font-size: 1.1rem;
+  }
+  
+  .badge {
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  
+  .badge-danger { color: #b91c1c; background: #fee2e2; }
+  .badge-info { color: #854d0e; background: #fef9c3; }
+  
+  .toggle-icon {
+    color: var(--text-light);
+    font-size: 0.8rem;
+  }
+  
+  /* Body Content */
+  .card-body {
+    padding: 0 20px;
+    background: #fafafa;
+  }
+  
+  .medicine-row {
+    padding: 20px 0;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .medicine-row:last-child {
+    border-bottom: none;
+  }
+  
+
+  .med-confirmed {
+    border-left: 4px solid #16a34a;
+    background: #f0fdf4;
+  }
+  
+  .med-hold {
+    opacity: 0.55;
+  }
+  
+  /* Medicine Details */
+  .med-name {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    color: var(--text-dark);
+  }
+  
+  .med-meta {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 8px;
+    display: flex;
+    gap: 15px;
+  }
+  
+  .days-left { font-weight: bold; }
+  .text-red { color: #dc2626; }
+  .text-orange { color: #d97706; }
+  .text-green { color: #16a34a; }
+  
+  /* Status Pills */
+  .status-pill {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+  }
+  
+  .status-confirmed { background: #dcfce7; color: #15803d; }
+  .status-cancelled { background: #fee2e2; color: #991b1b; }
+  .status-hold { background: #ffedd5; color: #c2410c; }
+  
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    flex: 1; /* Equal width buttons on mobile */
+    max-width: 100px;
+  }
+  
+  .btn-confirm {
+    background: var(--primary-green);
+    color: white;
+  }
+  .btn-confirm:hover { background: #065f46; }
+  
+  .btn-hold {
+    background: white;
+    border-color: #d1d5db;
+    color: var(--text-dark);
+  }
+  .btn-hold:hover { background: #e5e7eb; }
+  
+  .btn-cancel {
+    background: white;
+    border-color: #fca5a5;
+    color: #ef4444;
+  }
+  .btn-cancel:hover { background: #fee2e2; }
+  
+  .empty-state {
+    text-align: center;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: 30px;
+  }
+  
+  /* Tablet/Desktop Tweaks */
+  @media (min-width: 600px) {
+    .medicine-row {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .action-buttons {
+      justify-content: flex-end;
+    }
+  }
+
+  

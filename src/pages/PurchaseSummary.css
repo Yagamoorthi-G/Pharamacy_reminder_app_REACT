@@ -1,0 +1,207 @@
+:root {
+    --primary-green: #064e3b;
+    --accent-yellow: #facc15;
+    --bg-gray: #f3f4f6;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+  }
+  
+  .page-container {
+    background-color: var(--bg-gray);
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .content-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  /* Header */
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-left: 5px solid var(--primary-green);
+  }
+  
+  .summary-header h2 {
+    margin: 0;
+    color: var(--primary-green);
+  }
+  
+  .subtitle {
+    margin: 5px 0 0 0;
+    color: var(--text-light);
+    font-size: 0.9rem;
+  }
+  
+  .btn-print {
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  
+  .btn-print:hover {
+    background: #065f46;
+  }
+  
+  /* Cards */
+  .summary-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .summary-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid #ccc;
+    transition: transform 0.2s;
+  }
+  
+  .summary-card:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Status Indicators (Border Colors) */
+  .card-pending {
+    border-left-color: var(--accent-yellow); /* Yellow for To Buy */
+  }
+  
+  .card-purchased {
+    border-left-color: var(--primary-green); /* Green for Done */
+    background-color: #f9fafb; /* Slight grey out */
+  }
+  
+  /* Card Content */
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .med-info h3 {
+    margin: 0 0 5px 0;
+    color: var(--text-dark);
+    font-size: 1.2rem;
+  }
+  
+  .qty-badge {
+    background: #f3f4f6;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--primary-green);
+    border: 1px solid #e5e7eb;
+  }
+  
+  /* Action Buttons */
+  .btn-mark {
+    background: white;
+    border: 1px solid var(--primary-green);
+    color: var(--primary-green);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  .btn-mark:hover {
+    background: #f0fdf4;
+  }
+  
+  .status-done {
+    color: var(--primary-green);
+    font-weight: bold;
+    background: #dcfce7;
+    padding: 6px 12px;
+    border-radius: 6px;
+  }
+  
+  /* Details Dropdown */
+  .customer-details {
+    border-top: 1px dashed #e5e7eb;
+    padding-top: 10px;
+  }
+  
+  .customer-details summary {
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    font-weight: 500;
+    outline: none;
+  }
+  
+  .customer-details summary:hover {
+    color: var(--primary-green);
+  }
+  
+  .cust-list {
+    list-style: none;
+    padding: 10px 0 0 20px;
+    margin: 0;
+  }
+  
+  .cust-list li {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+  }
+  
+  .cust-list .phone {
+    color: var(--text-light);
+    margin-left: 5px;
+  }
+  
+  .cust-list .date {
+    float: right;
+    color: var(--text-light);
+    font-size: 0.85rem;
+  }
+  
+  .empty-state {
+    text-align: center;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: 40px;
+  }
+  
+  /* PRINT MEDIA QUERY */
+  @media print {
+    .btn-print, nav, .btn-mark, summary {
+      display: none !important;
+    }
+    .page-container {
+      background: white;
+      padding: 0;
+    }
+    .summary-card {
+      box-shadow: none;
+      border: 1px solid #ccc;
+      page-break-inside: avoid;
+    }
+    .customer-details {
+      display: block !important;
+    }
+    details[open] > summary {
+      display: none;
+    }
+    /* Force expand details for printing */
+    details > * { display: block; } 
+  }

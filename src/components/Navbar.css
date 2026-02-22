@@ -1,0 +1,31 @@
+/* src/components/Navbar.css */
+.navbar {
+    background-color: #064e3b;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    border-bottom: 4px solid #eab308;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap; /* Allows links to wrap on small screens */
+  }
+  
+  .nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  
+  @media (max-width: 600px) {
+    .navbar {
+      padding: 1rem;
+      gap: 15px;
+      justify-content: center;
+    }
+    .nav-link {
+      font-size: 14px;
+    }
+  }
