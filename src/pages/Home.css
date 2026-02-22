@@ -118,6 +118,7 @@
   .section h3 {
     color: var(--primary-green);
     margin-top: 0;
+    border-radius: 8px;
     border-bottom: 2px solid #e5e7eb;
     padding-bottom: 10px;
     margin-bottom: 15px;
