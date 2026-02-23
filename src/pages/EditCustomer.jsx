@@ -13,8 +13,11 @@ export default function EditCustomer() {
   const [medicines, setMedicines] = useState([]);
   const [undoData, setUndoData] = useState(null);
   const undoTimer = useRef(null);
+  
+  // States for the Autocomplete Search
+  const [medicineList, setMedicineList] = useState([]);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  // Fetch data from SQLite on load
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
@@ -28,14 +31,24 @@ export default function EditCustomer() {
         console.error(error);
       }
     };
+
+    const fetchMedicines = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/medicines/search");
+        if (!res.ok) throw new Error("Server not responding");
+        const data = await res.json();
+        if (Array.isArray(data)) setMedicineList(data);
+      } catch(e) { 
+        console.error("Search API Error (Did you restart server.js?):", e);
+      }
+    };
+
     fetchCustomer();
+    fetchMedicines();
   }, [id]);
 
   if (!customer) return <div className="page-container"><h2>Loading...</h2></div>;
 
-  /* =========================
-     MEDICINE ACTIONS
-     ========================= */
   const addMedicine = () => {
     setMedicines([...medicines, { name: "", frequency: "", days: 0, tablets: 0 }]);
   };
@@ -85,9 +98,6 @@ export default function EditCustomer() {
     setMedicines(copy);
   };
 
-  /* =========================
-     SAVE TO SQLITE
-     ========================= */
   const saveAll = async () => {
     try {
       const response = await fetch(`http://localhost:3000/api/customers/${id}`, {
@@ -148,40 +158,83 @@ export default function EditCustomer() {
             </div>
 
             <div className="med-grid-body">
-              {medicines.map((m, index) => (
-                <div key={index} className="med-row">
-                  <input
-                    value={m.name || ""}
-                    placeholder="Medicine Name"
-                    onChange={(e) => updateMedicine(index, "name", e.target.value)}
-                  />
+              {medicines.map((m, index) => {
+                const filteredMeds = medicineList.filter(med => 
+                  med.toLowerCase().includes((m.name || "").toLowerCase())
+                );
 
-                  <div className="freq-group">
-                    {["M", "A", "E", "N"].map(f => (
-                      <label key={f} className={`freq-label ${m.frequency?.includes(f) ? "active" : ""}`}>
-                        <input
-                          hidden
-                          type="checkbox"
-                          checked={m.frequency?.includes(f) || false}
-                          onChange={() => toggleFrequency(index, f)}
-                        />
-                        {f}
-                      </label>
-                    ))}
+                return (
+                  <div key={index} className="med-row">
+                    
+                    {/* INLINE RELATIVE WRAPPER */}
+                    <div style={{ position: "relative", width: "100%" }}>
+                      <input
+                        value={m.name || ""}
+                        placeholder="Search medicine..."
+                        onChange={(e) => {
+                          updateMedicine(index, "name", e.target.value);
+                          setActiveDropdown(index);
+                        }}
+                        onFocus={() => setActiveDropdown(index)}
+                        onBlur={() => setActiveDropdown(null)}
+                        autoComplete="off"
+                        style={{ width: "100%", boxSizing: "border-box" }}
+                      />
+
+                      {/* SAFE INLINE DROPDOWN */}
+                      {activeDropdown === index && filteredMeds.length > 0 && (
+                        <div style={{
+                          position: "absolute", top: "100%", left: 0, width: "100%",
+                          background: "white", border: "1px solid #e5e7eb", zIndex: 999,
+                          maxHeight: "200px", overflowY: "auto", boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                          borderRadius: "4px", marginTop: "2px"
+                        }}>
+                          {filteredMeds.map((med, i) => (
+                            <div
+                              key={i}
+                              onMouseDown={(e) => {
+                                e.preventDefault(); // Prevents input from losing focus early
+                                updateMedicine(index, "name", med);
+                                setActiveDropdown(null);
+                              }}
+                              style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #f3f4f6", color: "#1f2937", textAlign: "left" }}
+                              onMouseEnter={(e) => e.target.style.background = "#f0fdf4"}
+                              onMouseLeave={(e) => e.target.style.background = "white"}
+                            >
+                              {med}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="freq-group">
+                      {["M", "A", "E", "N"].map(f => (
+                        <label key={f} className={`freq-label ${m.frequency?.includes(f) ? "active" : ""}`}>
+                          <input
+                            hidden
+                            type="checkbox"
+                            checked={m.frequency?.includes(f) || false}
+                            onChange={() => toggleFrequency(index, f)}
+                          />
+                          {f}
+                        </label>
+                      ))}
+                    </div>
+
+                    <input
+                      type="number"
+                      value={m.days || ""}
+                      placeholder="0"
+                      onChange={(e) => updateMedicine(index, "days", e.target.value)}
+                    />
+
+                    <input type="number" readOnly value={m.tablets || 0} className="readonly" />
+
+                    <button className="btn-delete" onClick={() => deleteMedicine(index)}>✕</button>
                   </div>
-
-                  <input
-                    type="number"
-                    value={m.days || ""}
-                    placeholder="0"
-                    onChange={(e) => updateMedicine(index, "days", e.target.value)}
-                  />
-
-                  <input type="number" readOnly value={m.tablets || 0} className="readonly" />
-
-                  <button className="btn-delete" onClick={() => deleteMedicine(index)}>✕</button>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="card-footer">
