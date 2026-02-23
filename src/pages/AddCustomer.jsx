@@ -1,73 +1,78 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import "./AddCustomer.css";
 
-const freqCount = (freq) => freq.length;
+const freqCount = (freq) => (Array.isArray(freq) ? freq.length : 0);
 
 export default function AddCustomer() {
-  // Temporarily empty until we build the GET endpoint to fetch existing medicines from SQLite
-  const suggestions = [];
-
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [tags, setTags] = useState([]);
-  const [medicines, setMedicines] = useState([
-    { name: "", freq: [], days: "", tablets: 0 }
-  ]);
+  const [medicines, setMedicines] = useState([{ name: "", freq: [], days: "", tablets: 0 }]);
+  
+  // States for the Autocomplete Search
+  const [medicineList, setMedicineList] = useState([]);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  const toggleFreq = (i, f) => {
+  // Fetch unique medicines on load safely
+  useEffect(() => {
+    fetch("http://localhost:3000/api/medicines/search")
+      .then(res => {
+        if (!res.ok) throw new Error("Server not responding");
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) setMedicineList(data);
+      })
+      .catch(e => console.error("Search API Error (Did you restart server.js?):", e));
+  }, []);
+
+  const toggleTag = (tag) => {
+    setTags(tags.includes(tag) ? tags.filter(t => t !== tag) : [...tags, tag]);
+  };
+
+  const addMedicine = () => {
+    setMedicines([...medicines, { name: "", freq: [], days: "", tablets: 0 }]);
+  };
+
+  const deleteMedicine = (index) => {
     const copy = [...medicines];
-    copy[i].freq = copy[i].freq.includes(f)
-      ? copy[i].freq.filter(x => x !== f)
-      : [...copy[i].freq, f];
-    copy[i].tablets = freqCount(copy[i].freq) * Number(copy[i].days || 0);
+    copy.splice(index, 1);
     setMedicines(copy);
   };
 
-  const updateDays = (i, value) => {
+  const updateMedicine = (index, field, value) => {
     const copy = [...medicines];
-    copy[i].days = value;
-    copy[i].tablets = freqCount(copy[i].freq) * Number(value || 0);
+    copy[index][field] = value;
+    if (field === "days") {
+        const fCount = freqCount(copy[index].freq);
+        copy[index].tablets = fCount * Number(value || 0);
+    }
+    setMedicines(copy);
+  };
+
+  const toggleFreq = (index, f) => {
+    const copy = [...medicines];
+    const current = copy[index].freq;
+    copy[index].freq = current.includes(f) ? current.filter(x => x !== f) : [...current, f];
+    copy[index].tablets = freqCount(copy[index].freq) * Number(copy[index].days || 0);
     setMedicines(copy);
   };
 
   const saveCustomer = async () => {
-    if (!name || !phone) {
-      alert("Name and phone required");
-      return;
-    }
-
+    if (!name || !phone) return alert("Name and phone required");
     try {
-      // Connect to our new backend server
-      const response = await fetch("http://localhost:3000/api/customers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          phone,
-          tags,
-          // Filter out empty rows before sending
-          medicines: medicines.filter(m => m.name.trim() !== "")
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Customer saved successfully to SQLite database!");
-        // Reset the form
-        setName("");
-        setPhone("");
-        setTags([]);
-        setMedicines([{ name: "", freq: [], days: "", tablets: 0 }]);
-      } else {
-        alert("Error saving customer: " + data.error);
-      }
-    } catch (error) {
-      console.error("Database connection failed:", error);
-      alert("Failed to connect to the server. Make sure node server.js is running.");
+        const res = await fetch("http://localhost:3000/api/customers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, phone, tags, medicines })
+        });
+        if (res.ok) navigate("/customers");
+        else alert("Failed to save");
+    } catch (e) {
+        console.error(e);
     }
   };
 
@@ -78,174 +83,113 @@ export default function AddCustomer() {
         <div className="card">
           <div className="card-header">
             <h2>New Prescription</h2>
-            <div className="subtitle">Enter customer details and medication below</div>
+            <p className="subtitle">Enter customer details and medication below</p>
           </div>
 
-          {/* Customer info */}
-          <div className="section-title">Customer Details</div>
+          <div className="section-title">CUSTOMER DETAILS</div>
           <div className="two-col">
             <div className="input-group">
               <label>Full Name</label>
-              <input
-                type="text"
-                placeholder="e.g. Rajesh Kumar"
-                value={name}
-                onChange={e => setName(e.target.value)}
-              />
+              <input placeholder="e.g. Rajesh Kumar" value={name} onChange={e => setName(e.target.value)} />
             </div>
             <div className="input-group">
               <label>Phone Number</label>
-              <input
-                type="text"
-                placeholder="e.g. 9876543210"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-              />
+              <input placeholder="e.g. 9876543210" value={phone} onChange={e => setPhone(e.target.value)} />
             </div>
           </div>
 
-          {/* Tags - SINGLE ROW */}
           <div className="tags-container">
             <span className="tag-label">Category:</span>
             <div className="tags">
               {["Weekly", "Monthly", "Irregular"].map(t => (
                 <label key={t} className={tags.includes(t) ? "active" : ""}>
-                  <input
-                    type="checkbox"
-                    checked={tags.includes(t)}
-                    onChange={() =>
-                      setTags(
-                        tags.includes(t)
-                          ? tags.filter(x => x !== t)
-                          : [...tags, t]
-                      )
-                    }
-                  />{" "}
+                  <input type="checkbox" checked={tags.includes(t)} onChange={() => toggleTag(t)} />
                   {t}
                 </label>
               ))}
             </div>
           </div>
 
-          <div className="section-title">Medication List</div>
-
-          {/* Header - 5 Columns */}
-          <div className="med-header med-grid-layout">
-            <div>Medicine Name</div>
-            <div style={{textAlign: "center"}}>Frequency</div>
-            <div style={{textAlign: "center"}}>Days</div>
-            <div style={{textAlign: "center"}}>Total</div>
-            <div style={{textAlign: "center"}}>Action</div>
+          <div className="section-title">MEDICATION LIST</div>
+          <div className="med-grid-layout med-header">
+            <div>MEDICINE NAME</div>
+            <div style={{ textAlign: "center" }}>FREQUENCY</div>
+            <div style={{ textAlign: "center" }}>DAYS</div>
+            <div style={{ textAlign: "center" }}>TOTAL</div>
+            <div style={{ textAlign: "center" }}>ACTION</div>
           </div>
 
-          {/* Rows - 5 Columns */}
-          <div className="med-rows">
-            {medicines.map((m, i) => (
-              <div key={i} className="med-row med-grid-layout">
+          {medicines.map((m, index) => {
+            // Filter list based on typed text
+            const filteredMeds = medicineList.filter(med => 
+              med.toLowerCase().includes((m.name || "").toLowerCase())
+            );
+
+            return (
+              <div key={index} className="med-row med-grid-layout">
                 
-                {/* 1. Medicine Name */}
-                <div className="auto">
+                {/* INLINE RELATIVE WRAPPER KEEPS DROPDOWN ATTACHED TO INPUT */}
+                <div style={{ position: "relative", width: "100%" }}>
                   <input
-                    type="text"
                     placeholder="Search medicine..."
                     value={m.name}
-                    onChange={e => {
-                      const copy = [...medicines];
-                      copy[i].name = e.target.value;
-                      setMedicines(copy);
+                    onChange={(e) => {
+                      updateMedicine(index, "name", e.target.value);
+                      setActiveDropdown(index);
                     }}
+                    onFocus={() => setActiveDropdown(index)}
+                    onBlur={() => setActiveDropdown(null)}
+                    autoComplete="off"
+                    style={{ width: "100%", boxSizing: "border-box" }}
                   />
-                  {m.name && suggestions.length > 0 && (
-                    <div className="dropdown">
-                      {suggestions
-                        .filter(s =>
-                          s.toLowerCase().startsWith(m.name.toLowerCase())
-                        )
-                        .slice(0, 5)
-                        .map((s, idx) => (
-                          <div
-                            key={idx}
-                            onClick={() => {
-                              const copy = [...medicines];
-                              copy[i].name = s;
-                              setMedicines(copy);
-                            }}
-                          >
-                            {s}
-                          </div>
-                        ))}
+                  
+                  {/* SAFE INLINE DROPDOWN */}
+                  {activeDropdown === index && filteredMeds.length > 0 && (
+                    <div style={{
+                      position: "absolute", top: "100%", left: 0, width: "100%",
+                      background: "white", border: "1px solid #e5e7eb", zIndex: 999,
+                      maxHeight: "200px", overflowY: "auto", boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                      borderRadius: "4px", marginTop: "2px"
+                    }}>
+                      {filteredMeds.map((med, i) => (
+                        <div
+                          key={i}
+                          onMouseDown={(e) => {
+                            e.preventDefault(); // Prevents input from losing focus early
+                            updateMedicine(index, "name", med);
+                            setActiveDropdown(null);
+                          }}
+                          style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #f3f4f6", color: "#1f2937", textAlign: "left" }}
+                          onMouseEnter={(e) => e.target.style.background = "#f0fdf4"}
+                          onMouseLeave={(e) => e.target.style.background = "white"}
+                        >
+                          {med}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
 
-                {/* 2. Frequency Buttons (M A E N) */}
                 <div className="freq-group">
                   {["M", "A", "E", "N"].map(f => (
-                    <label 
-                      key={f} 
-                      className={`freq-label ${m.freq.includes(f) ? 'active' : ''}`}
-                    >
+                    <label key={f} className={`freq-label ${m.freq.includes(f) ? "active" : ""}`}>
+                      <input type="checkbox" checked={m.freq.includes(f)} onChange={() => toggleFreq(index, f)} />
                       {f}
-                      <input
-                        type="checkbox"
-                        checked={m.freq.includes(f)}
-                        onChange={() => toggleFreq(i, f)}
-                      />
                     </label>
                   ))}
                 </div>
 
-                {/* 3. Days */}
-                <input
-                  type="number"
-                  placeholder="0"
-                  className="small-input"
-                  value={m.days}
-                  onChange={e => updateDays(i, e.target.value)}
-                />
-
-                {/* 4. Total */}
-                <input
-                  type="number"
-                  value={m.tablets}
-                  readOnly
-                  className="small-input readonly"
-                />
-
-                {/* 5. Delete */}
-                <div style={{display: "flex", justifyContent: "center"}}>
-                  <button
-                    className="delete-btn"
-                    title="Remove Medicine"
-                    onClick={() =>
-                      setMedicines(medicines.filter((_, x) => x !== i))
-                    }
-                  >
-                    ✕
-                  </button>
-                </div>
-
+                <input className="small-input" type="number" placeholder="0" value={m.days} onChange={(e) => updateMedicine(index, "days", e.target.value)} />
+                <input className="small-input readonly" readOnly value={m.tablets} />
+                
+                <button className="delete-btn" onClick={() => deleteMedicine(index)}>✕</button>
               </div>
-            ))}
-          </div>
+            );
+          })}
 
-          {/* Bottom Buttons */}
           <div className="btn-group">
-            <button
-              className="add-med"
-              onClick={() =>
-                setMedicines([
-                  ...medicines,
-                  { name: "", freq: [], days: "", tablets: 0 }
-                ])
-              }
-            >
-              + Add Medicine
-            </button>
-
-            <button className="save-cust" onClick={saveCustomer}>
-              ✅ Save Customer
-            </button>
+            <button className="add-med" onClick={addMedicine}>+ Add Medicine</button>
+            <button className="save-cust" onClick={saveCustomer}>✔ Save Customer</button>
           </div>
         </div>
       </div>
