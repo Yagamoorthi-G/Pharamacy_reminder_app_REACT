@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import "./EditCustomer.css";
 
 const freqCount = (freq) => (freq ? freq.split("/").length : 0);
+const MED_TYPES = ["Tablet", "Syrup", "Capsule", "Drops", "Cream", "Injection", "General items"];
 
 export default function EditCustomer() {
   const { id } = useParams();
@@ -14,7 +15,6 @@ export default function EditCustomer() {
   const [undoData, setUndoData] = useState(null);
   const undoTimer = useRef(null);
   
-  // States for the Autocomplete Search
   const [medicineList, setMedicineList] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
 
@@ -39,7 +39,7 @@ export default function EditCustomer() {
         const data = await res.json();
         if (Array.isArray(data)) setMedicineList(data);
       } catch(e) { 
-        console.error("Search API Error (Did you restart server.js?):", e);
+        console.error("Search API Error:", e);
       }
     };
 
@@ -50,7 +50,7 @@ export default function EditCustomer() {
   if (!customer) return <div className="page-container"><h2>Loading...</h2></div>;
 
   const addMedicine = () => {
-    setMedicines([...medicines, { name: "", frequency: "", days: 0, tablets: 0 }]);
+    setMedicines([...medicines, { name: "", type: "Tablet", frequency: "", days: 0, tablets: 0 }]);
   };
 
   const deleteMedicine = (index) => {
@@ -121,6 +121,28 @@ export default function EditCustomer() {
     }
   };
 
+  // NEW: DELETE CUSTOMER FUNCTION
+  const deleteCustomer = async () => {
+    const confirmDelete = window.confirm(
+      "🛑 WARNING 🛑\n\nAre you sure you want to permanently delete this customer and all of their medicines? This cannot be undone."
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/customers/${id}`, {
+        method: "DELETE"
+      });
+      if (response.ok) {
+        alert("Customer permanently deleted.");
+        navigate("/customers");
+      } else {
+        alert("Failed to delete customer.");
+      }
+    } catch (error) {
+      console.error("Failed to delete:", error);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -151,6 +173,7 @@ export default function EditCustomer() {
 
             <div className="med-grid-header">
               <div>Medicine</div>
+              <div>Type</div>
               <div className="center-text">Freq</div>
               <div>Days</div>
               <div>Total</div>
@@ -166,7 +189,6 @@ export default function EditCustomer() {
                 return (
                   <div key={index} className="med-row">
                     
-                    {/* INLINE RELATIVE WRAPPER */}
                     <div style={{ position: "relative", width: "100%" }}>
                       <input
                         value={m.name || ""}
@@ -181,7 +203,6 @@ export default function EditCustomer() {
                         style={{ width: "100%", boxSizing: "border-box" }}
                       />
 
-                      {/* SAFE INLINE DROPDOWN */}
                       {activeDropdown === index && filteredMeds.length > 0 && (
                         <div style={{
                           position: "absolute", top: "100%", left: 0, width: "100%",
@@ -193,7 +214,7 @@ export default function EditCustomer() {
                             <div
                               key={i}
                               onMouseDown={(e) => {
-                                e.preventDefault(); // Prevents input from losing focus early
+                                e.preventDefault(); 
                                 updateMedicine(index, "name", med);
                                 setActiveDropdown(null);
                               }}
@@ -207,6 +228,15 @@ export default function EditCustomer() {
                         </div>
                       )}
                     </div>
+
+                    {/* NEW: Medicine Type Dropdown */}
+                    <select 
+                      className="type-select" 
+                      value={m.type || "Tablet"} 
+                      onChange={(e) => updateMedicine(index, "type", e.target.value)}
+                    >
+                      {MED_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+                    </select>
 
                     <div className="freq-group">
                       {["M", "A", "E", "N"].map(f => (
@@ -241,6 +271,20 @@ export default function EditCustomer() {
               <button className="btn-add" onClick={addMedicine}>+ Add Medicine</button>
             </div>
           </div>
+
+          {/* NEW: DANGER ZONE SECTON */}
+          <div className="card danger-zone">
+            <div className="visit-header">
+              <span className="visit-date" style={{color: "#dc2626"}}>⚠️ Danger Zone</span>
+            </div>
+            <p style={{color: "var(--text-light)", marginBottom: "15px"}}>
+              Permanently remove this customer and all of their prescriptions from the database. This action cannot be undone.
+            </p>
+            <button className="btn-delete-customer" onClick={deleteCustomer}>
+              🗑️ Delete Customer
+            </button>
+          </div>
+
         </div>
 
         <div className="footer-actions">

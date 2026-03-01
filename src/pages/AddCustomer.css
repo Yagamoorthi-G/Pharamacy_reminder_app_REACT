@@ -15,7 +15,7 @@
 }
 
 .card {
-  max-width: 1100px;
+  max-width: 1100px; 
   margin: auto;
   background: var(--card-bg);
   padding: 30px;
@@ -41,7 +41,6 @@ h2 { margin: 0; color: var(--primary-green); font-size: 1.8rem; }
   text-transform: uppercase;
 }
 
-/* --- Customer Details --- */
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -61,7 +60,6 @@ input {
   box-sizing: border-box;
 }
 
-/* --- CATEGORY SECTION --- */
 .tags-container {
   display: grid; 
   gap: 10px;
@@ -87,7 +85,9 @@ input {
 
 .tags label {
   display: flex;
-  gap: 1px;
+  align-items: center; 
+  justify-content: center;
+  gap: 5px; 
   background: white;
   border: 1px solid var(--border-color);
   padding: 6px 16px;
@@ -104,14 +104,12 @@ input {
   font-weight: 600;
 }
 
-.tags input[type="checkbox"] { accent-color: var(--primary-green); }
+.tags input[type="checkbox"] { accent-color: var(--primary-green); margin: 0; }
 
-
-/* --- MEDICINE LIST (Fixed for iPad Overflow) --- */
-/* Uses fractional sizing (fr) instead of a hard 130px gap so it auto-shrinks on iPad */
+/* UPDATED GRID: Fits the new "Type" column (110px width) perfectly */
 .med-grid-layout {
   display: grid;
-  grid-template-columns: 2.5fr 2fr 0.8fr 0.8fr 0.5fr; 
+  grid-template-columns: 2fr 110px 2fr 0.8fr 0.8fr 0.5fr; 
   gap: 15px;
   align-items: center;
 }
@@ -134,6 +132,18 @@ input {
 }
 
 .auto { position: relative; width: 100%; }
+
+/* NEW: Styles for the Type Dropdown Box */
+.type-select {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: white;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--text-dark);
+}
 
 .freq-group {
   display: flex;
@@ -216,11 +226,11 @@ button.save-cust {
    ========================================= */
 @media (max-width: 1024px) {
   .tags { flex-wrap: wrap; }
-  .med-grid-layout { gap: 10px; }
+  .med-grid-layout { gap: 10px; grid-template-columns: 1.5fr 100px 1.5fr 0.8fr 0.8fr 0.5fr; }
 }
 
 /* =========================================
-   MOBILE PHONE RESPONSIVENESS (Ensures inputs don't vanish)
+   MOBILE PHONE RESPONSIVENESS
    ========================================= */
 @media (max-width: 768px) {
   .two-col { grid-template-columns: 1fr; gap: 15px; }
@@ -230,7 +240,7 @@ button.save-cust {
   
   .med-grid-layout {
     display: grid !important;
-    grid-template-columns: 1fr !important; /* Forces inputs to stack vertically */
+    grid-template-columns: 1fr !important; 
     gap: 15px;
     background: #f9fafb;
     padding: 15px;

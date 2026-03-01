@@ -4,19 +4,20 @@ import Navbar from "../components/Navbar";
 import "./AddCustomer.css";
 
 const freqCount = (freq) => (Array.isArray(freq) ? freq.length : 0);
+const MED_TYPES = ["Tablet", "Syrup", "Capsule", "Drops", "Cream", "Injection", "General items"];
 
 export default function AddCustomer() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [tags, setTags] = useState([]);
-  const [medicines, setMedicines] = useState([{ name: "", freq: [], days: "", tablets: 0 }]);
   
-  // States for the Autocomplete Search
+  // Added "type" to initial state
+  const [medicines, setMedicines] = useState([{ name: "", type: "Tablet", freq: [], days: "", tablets: 0 }]);
+  
   const [medicineList, setMedicineList] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
 
-  // Fetch unique medicines on load safely
   useEffect(() => {
     fetch("http://localhost:3000/api/medicines/search")
       .then(res => {
@@ -34,7 +35,7 @@ export default function AddCustomer() {
   };
 
   const addMedicine = () => {
-    setMedicines([...medicines, { name: "", freq: [], days: "", tablets: 0 }]);
+    setMedicines([...medicines, { name: "", type: "Tablet", freq: [], days: "", tablets: 0 }]);
   };
 
   const deleteMedicine = (index) => {
@@ -113,6 +114,7 @@ export default function AddCustomer() {
           <div className="section-title">MEDICATION LIST</div>
           <div className="med-grid-layout med-header">
             <div>MEDICINE NAME</div>
+            <div>TYPE</div>
             <div style={{ textAlign: "center" }}>FREQUENCY</div>
             <div style={{ textAlign: "center" }}>DAYS</div>
             <div style={{ textAlign: "center" }}>TOTAL</div>
@@ -120,7 +122,6 @@ export default function AddCustomer() {
           </div>
 
           {medicines.map((m, index) => {
-            // Filter list based on typed text
             const filteredMeds = medicineList.filter(med => 
               med.toLowerCase().includes((m.name || "").toLowerCase())
             );
@@ -128,7 +129,6 @@ export default function AddCustomer() {
             return (
               <div key={index} className="med-row med-grid-layout">
                 
-                {/* INLINE RELATIVE WRAPPER KEEPS DROPDOWN ATTACHED TO INPUT */}
                 <div style={{ position: "relative", width: "100%" }}>
                   <input
                     placeholder="Search medicine..."
@@ -143,7 +143,6 @@ export default function AddCustomer() {
                     style={{ width: "100%", boxSizing: "border-box" }}
                   />
                   
-                  {/* SAFE INLINE DROPDOWN */}
                   {activeDropdown === index && filteredMeds.length > 0 && (
                     <div style={{
                       position: "absolute", top: "100%", left: 0, width: "100%",
@@ -155,7 +154,7 @@ export default function AddCustomer() {
                         <div
                           key={i}
                           onMouseDown={(e) => {
-                            e.preventDefault(); // Prevents input from losing focus early
+                            e.preventDefault(); 
                             updateMedicine(index, "name", med);
                             setActiveDropdown(null);
                           }}
@@ -169,6 +168,15 @@ export default function AddCustomer() {
                     </div>
                   )}
                 </div>
+
+                {/* NEW: Medicine Type Dropdown */}
+                <select 
+                  className="type-select" 
+                  value={m.type} 
+                  onChange={(e) => updateMedicine(index, "type", e.target.value)}
+                >
+                  {MED_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+                </select>
 
                 <div className="freq-group">
                   {["M", "A", "E", "N"].map(f => (

@@ -8,8 +8,7 @@ const sqlite3 = sqlite3Pkg.verbose();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// NEW: This forces the server to strictly use the real database in your root folder, 
-// no matter which folder you run the terminal from!
+// Hardcoded path to ensure we always use the real database
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dbPath = path.resolve(__dirname, '../medical_shop.db');
@@ -22,6 +21,9 @@ const db = new sqlite3.Database(dbPath, (err) => {
   else {
     console.log(`Connected to REAL SQLite database at: ${dbPath}`);
     db.serialize(() => {
+      // ENABLES CASCADE DELETION (Crucial for deleting customers cleanly)
+      db.run("PRAGMA foreign_keys = ON");
+
       db.run(`CREATE TABLE IF NOT EXISTS main_customers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL, phone TEXT NOT NULL, tags TEXT,
@@ -32,13 +34,18 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
       db.run(`CREATE TABLE IF NOT EXISTS main_medicines (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        customer_id INTEGER, name TEXT NOT NULL, frequency TEXT,
+        customer_id INTEGER, name TEXT NOT NULL, type TEXT DEFAULT 'Tablet', frequency TEXT,
         days INTEGER, tablets INTEGER, due_date DATETIME,
         orderStatus TEXT DEFAULT 'HOLD',
         purchaseStatus TEXT DEFAULT 'PENDING',
         purchasedAt DATETIME,
         FOREIGN KEY (customer_id) REFERENCES main_customers (id) ON DELETE CASCADE
       )`);
+
+      // AUTOMATICALLY UPGRADE EXISTING DATABASE TO INCLUDE 'TYPE' COLUMN
+      db.run(`ALTER TABLE main_medicines ADD COLUMN type TEXT DEFAULT 'Tablet'`, (err) => {
+        // Safe to ignore error if column already exists
+      });
 
       db.run(`CREATE TABLE IF NOT EXISTS purchase_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,13 +56,15 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
+// ADD CUSTOMER
 app.post('/api/customers', (req, res) => {
   const { name, phone, tags, medicines } = req.body;
   db.run(`INSERT INTO main_customers (name, phone, tags) VALUES (?, ?, ?)`, [name, phone, JSON.stringify(tags || [])], function (err) {
       if (err) return res.status(500).json({ error: err.message });
       const customerId = this.lastID; 
       if (medicines && medicines.length > 0) {
-        const stmt = db.prepare(`INSERT INTO main_medicines (customer_id, name, frequency, days, tablets, due_date) VALUES (?, ?, ?, ?, ?, ?)`);
+        // Updated to insert Type
+        const stmt = db.prepare(`INSERT INTO main_medicines (customer_id, name, type, frequency, days, tablets, due_date) VALUES (?, ?, ?, ?, ?, ?, ?)`);
         medicines.forEach((med) => {
           if (med.name.trim() !== "") {
             const freq = Array.isArray(med.freq) ? med.freq.join('/') : med.freq;
@@ -63,7 +72,7 @@ app.post('/api/customers', (req, res) => {
             const dueDateObj = new Date();
             const alertOffset = daysCount > 0 ? daysCount - 1 : 0; 
             dueDateObj.setDate(dueDateObj.getDate() + alertOffset);
-            stmt.run([customerId, med.name, freq, daysCount, med.tablets || 0, dueDateObj.toISOString()]);
+            stmt.run([customerId, med.name, med.type || 'Tablet', freq, daysCount, med.tablets || 0, dueDateObj.toISOString()]);
           }
         });
         stmt.finalize();
@@ -73,8 +82,9 @@ app.post('/api/customers', (req, res) => {
   );
 });
 
+// GET ALL CUSTOMERS
 app.get('/api/customers', (req, res) => {
-  const query = `SELECT c.*, m.id as med_id, m.name as med_name, m.frequency, m.days, m.tablets, m.due_date, m.orderStatus, m.purchaseStatus, m.purchasedAt
+  const query = `SELECT c.*, m.id as med_id, m.name as med_name, m.type, m.frequency, m.days, m.tablets, m.due_date, m.orderStatus, m.purchaseStatus, m.purchasedAt
                  FROM main_customers c LEFT JOIN main_medicines m ON c.id = m.customer_id`;
   db.all(query, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -84,13 +94,14 @@ app.get('/api/customers', (req, res) => {
         customersMap[row.id] = { id: row.id, name: row.name, phone: row.phone, reminderStatus: row.reminderStatus, renewalNote: row.renewalNote, last_visit: row.created_at, medicines: [] };
       }
       if (row.med_id) {
-        customersMap[row.id].medicines.push({ id: row.med_id, name: row.med_name, frequency: row.frequency, days: row.days, tablets: row.tablets, due_date: row.due_date, orderStatus: row.orderStatus, purchaseStatus: row.purchaseStatus, purchasedAt: row.purchasedAt });
+        customersMap[row.id].medicines.push({ id: row.med_id, name: row.med_name, type: row.type, frequency: row.frequency, days: row.days, tablets: row.tablets, due_date: row.due_date, orderStatus: row.orderStatus, purchaseStatus: row.purchaseStatus, purchasedAt: row.purchasedAt });
       }
     });
     res.json(Object.values(customersMap));
   });
 });
 
+// GET SINGLE CUSTOMER
 app.get('/api/customers/:id', (req, res) => {
   const { id } = req.params;
   db.get(`SELECT * FROM main_customers WHERE id = ?`, [id], (err, customer) => {
@@ -102,13 +113,15 @@ app.get('/api/customers/:id', (req, res) => {
   });
 });
 
+// UPDATE CUSTOMER
 app.put('/api/customers/:id', (req, res) => {
   const { id } = req.params;
   const { name, phone, medicines } = req.body;
   db.run(`UPDATE main_customers SET name = ?, phone = ? WHERE id = ?`, [name, phone, id], function(err) {
     db.run(`DELETE FROM main_medicines WHERE customer_id = ?`, [id], function() {
       if (medicines && medicines.length > 0) {
-        const stmt = db.prepare(`INSERT INTO main_medicines (customer_id, name, frequency, days, tablets, due_date) VALUES (?, ?, ?, ?, ?, ?)`);
+        // Updated to insert Type
+        const stmt = db.prepare(`INSERT INTO main_medicines (customer_id, name, type, frequency, days, tablets, due_date) VALUES (?, ?, ?, ?, ?, ?, ?)`);
         medicines.forEach((med) => {
           if (med.name && med.name.trim() !== "") {
             const freq = Array.isArray(med.frequency) ? med.frequency.join('/') : (med.frequency || "");
@@ -116,7 +129,7 @@ app.put('/api/customers/:id', (req, res) => {
             const dueDateObj = new Date();
             const alertOffset = daysCount > 0 ? daysCount - 1 : 0; 
             dueDateObj.setDate(dueDateObj.getDate() + alertOffset);
-            stmt.run([id, med.name, freq, daysCount, med.tablets || 0, dueDateObj.toISOString()]);
+            stmt.run([id, med.name, med.type || 'Tablet', freq, daysCount, med.tablets || 0, dueDateObj.toISOString()]);
           }
         });
         stmt.finalize();
@@ -126,6 +139,17 @@ app.put('/api/customers/:id', (req, res) => {
   });
 });
 
+// NEW: DELETE CUSTOMER ROUTE
+app.delete('/api/customers/:id', (req, res) => {
+  const { id } = req.params;
+  // Because PRAGMA foreign_keys = ON is set, deleting the customer also deletes their medicines
+  db.run(`DELETE FROM main_customers WHERE id = ?`, [id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true, deleted: this.changes });
+  });
+});
+
+// STATUS UPDATES
 app.patch('/api/medicines/:id/status', (req, res) => {
   const { id } = req.params;
   const { orderStatus, purchaseStatus, purchasedAt } = req.body;
@@ -142,6 +166,7 @@ app.patch('/api/medicines/:id/status', (req, res) => {
   }
 });
 
+// META STATUS UPDATES
 app.patch('/api/customers/:id/meta', (req, res) => {
   const { id } = req.params;
   const { reminderStatus, renewalNote } = req.body;
@@ -159,7 +184,7 @@ app.get('/api/purchase-history', (req, res) => {
   db.all(`SELECT * FROM purchase_history ORDER BY purchasedAt DESC LIMIT 100`, [], (err, rows) => res.json(rows));
 });
 
-// Search Database for Medicine Names
+// AUTOCOMPLETE SEARCH
 app.get('/api/medicines/search', (req, res) => {
   db.all(`SELECT DISTINCT name FROM main_medicines WHERE name IS NOT NULL AND name != '' ORDER BY name ASC`, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -168,7 +193,8 @@ app.get('/api/medicines/search', (req, res) => {
 });
 
 app.listen(port, () => {
+  
   console.log(`\n🚀 SERVER RUNNING ON PORT ${port}`);
-  console.log(`⚠️  DO NOT CLOSE THIS TERMINAL WINDOW!`);
-  console.log(`⚠️  IF YOUR TYPING PROMPT RETURNS, THE SERVER IS DEAD.\n`);
+  console.log(`⚠️  DO NOT CLOSE THIS TERMINAL WINDOW! \n`);
+  
 });

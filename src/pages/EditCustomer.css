@@ -1,240 +1,282 @@
 :root {
-    --primary-green: #064e3b;
-    --accent-yellow: #facc15;
-    --bg-gray: #f3f4f6;
-    --white: #ffffff;
-    --text-dark: #1f2937;
-    --border-color: #e5e7eb;
-  }
-  
-  .page-container {
-    background-color: var(--bg-gray);
-    min-height: 100vh;
-    padding: 40px 20px;
-    font-family: 'Segoe UI', sans-serif;
-    padding-bottom: 100px; /* Space for fixed footer if needed */
-  }
-  
-  /* Header Section */
-  .header-section {
-    max-width: 900px;
-    margin: 0 auto 30px auto;
-    text-align: center;
-  }
-  
-  .header-section h2 {
-    color: var(--primary-green);
-    margin-bottom: 10px;
-  }
-  
-  .customer-badge {
-    display: inline-flex;
-    gap: 15px;
-    background: white;
-    padding: 10px 20px;
-    border-radius: 30px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    border: 1px solid var(--border-color);
-  }
-  
-  .customer-badge .name { font-weight: bold; color: var(--text-dark); }
-  .customer-badge .phone { color: var(--primary-green); }
-  
-  /* Card Styles */
-  .visits-list {
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-  }
-  
-  .card {
-    background: var(--white);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    padding: 25px;
-    border-left: 6px solid var(--primary-green);
-  }
-  
-  .read-only-card {
-    border-left-color: #9ca3af;
-    background: #f9fafb;
-    opacity: 0.9;
-  }
-  
-  /* Visit Header inside Card */
-  .visit-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--border-color);
-  }
-  
-  .visit-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-  
-  .visit-date {
-    font-weight: 600;
-    color: var(--text-dark);
-  }
-  
-  .status-pill {
-    font-size: 0.8rem;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-weight: bold;
-  }
-  .status-pill.orange { background: #fff7ed; color: #c2410c; }
-  .status-pill.green { background: #dcfce7; color: #15803d; }
-  
-  .locked-tag {
-    font-size: 0.85rem;
-    color: #6b7280;
-    background: #e5e7eb;
-    padding: 4px 8px;
-    border-radius: 4px;
-  }
-  
-  /* Grid Layout for Medicines */
-  .med-grid-header {
-    display: grid;
-    grid-template-columns: 2.5fr 2fr 0.8fr 0.8fr 0.5fr; /* Name | Freq | Days | Total | Del */
-    gap: 15px;
-    padding: 10px;
-    background: var(--primary-green);
-    color: white;
-    font-size: 0.85rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    border-radius: 6px;
-    margin-bottom: 15px;
-  }
-  .med-grid-header .center-text { text-align: center; }
-  
-  .med-row {
-    display: grid;
-    grid-template-columns: 2.5fr 2fr 0.8fr 0.8fr 0.5fr;
-    gap: 15px;
-    align-items: center;
-    margin-bottom: 12px;
-    padding: 5px;
-  }
-  
-  /* Inputs */
-  input {
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    width: 100%;
-  }
-  input:disabled { background: #f3f4f6; cursor: not-allowed; }
-  input:focus { outline: none; border-color: var(--primary-green); }
-  
-  .input-tablets.readonly {
-    background: #f3f4f6;
-    border: none;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  /* Frequency Custom Checkboxes */
-  .freq-group {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-  }
-  
-  .hidden-checkbox { display: none; }
-  
-  .freq-label {
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    background: white;
-    transition: all 0.2s;
-  }
-  
-  .read-only-card .freq-label { cursor: default; opacity: 0.6; }
-  
-  /* Active State for Freq Checkboxes */
-  .freq-label.active {
-    background: var(--accent-yellow);
-    border-color: #eab308;
-    color: black;
-    font-weight: bold;
-  }
-  
-  /* Buttons */
-  .btn-delete {
-    background: white;
-    color: #ef4444;
-    border: 1px solid #fee2e2;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .btn-delete:hover { background: #fee2e2; }
-  
-  .card-footer {
-    margin-top: 20px;
-    text-align: right;
-  }
-  
-  .btn-add {
-    background: white;
-    border: 2px solid var(--primary-green);
-    color: var(--primary-green);
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-  }
-  .btn-add:hover { background: #f0fdf4; }
-  
-  .footer-actions {
-    max-width: 900px;
-    margin: 30px auto;
-    text-align: right;
-  }
-  
-  .btn-save {
-    background: var(--primary-green);
-    color: white;
-    padding: 12px 30px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(6, 78, 59, 0.3);
-    font-weight: bold;
-  }
-  .btn-save:hover { background: #065f46; transform: translateY(-1px); }
-  
-  /* Mobile Response */
-  @media (max-width: 768px) {
-    .med-grid-header { display: none; } /* Hide headers on mobile */
-    .med-row {
-      grid-template-columns: 1fr; /* Stack vertically */
-      background: white;
-      padding: 15px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-    }
-    .freq-group { justify-content: flex-start; }
-  }
+  --primary-green: #064e3b;
+  --accent-yellow: #facc15;
+  --bg-gray: #f3f4f6;
+  --white: #ffffff;
+  --text-dark: #1f2937;
+  --border-color: #e5e7eb;
+}
+
+.page-container {
+  background-color: var(--bg-gray);
+  min-height: 100vh;
+  padding: 40px 20px;
+  font-family: 'Segoe UI', sans-serif;
+  padding-bottom: 100px; 
+}
+
+.header-section {
+  max-width: 900px;
+  margin: 0 auto 30px auto;
+  text-align: center;
+}
+
+.header-section h2 {
+  color: var(--primary-green);
+  margin-bottom: 10px;
+}
+
+.customer-badge {
+  display: inline-flex;
+  gap: 15px;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+}
+
+.customer-badge .name { font-weight: bold; color: var(--text-dark); }
+.customer-badge .phone { color: var(--primary-green); }
+
+.visits-list {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  border-left: 6px solid var(--primary-green);
+}
+
+.read-only-card {
+  border-left-color: #9ca3af;
+  background: #f9fafb;
+  opacity: 0.9;
+}
+
+.visit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.visit-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.visit-date {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.status-pill {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+.status-pill.orange { background: #fff7ed; color: #c2410c; }
+.status-pill.green { background: #dcfce7; color: #15803d; }
+
+.locked-tag {
+  font-size: 0.85rem;
+  color: #6b7280;
+  background: #e5e7eb;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* --- FIX: EXACTLY 6 COLUMNS FOR 6 ELEMENTS --- */
+.med-grid-header {
+  display: grid;
+  /* Allocated 110px specifically for the new Type Dropdown */
+  grid-template-columns: 2.5fr 110px 2fr 0.8fr 0.8fr 0.5fr; 
+  gap: 15px;
+  padding: 10px;
+  background: var(--primary-green);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+.med-grid-header .center-text { text-align: center; }
+
+.med-row {
+  display: grid;
+  /* Matches header precisely */
+  grid-template-columns: 2.5fr 110px 2fr 0.8fr 0.8fr 0.5fr;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 5px;
+}
+
+input {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+input:disabled { background: #f3f4f6; cursor: not-allowed; }
+input:focus { outline: none; border-color: var(--primary-green); }
+
+.input-tablets.readonly {
+  background: #f3f4f6;
+  border: none;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* NEW: Dropdown styling */
+.type-select {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: white;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--text-dark);
+}
+
+.freq-group {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.hidden-checkbox { display: none; }
+
+.freq-label {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  background: white;
+  transition: all 0.2s;
+}
+
+.read-only-card .freq-label { cursor: default; opacity: 0.6; }
+
+.freq-label.active {
+  background: var(--accent-yellow);
+  border-color: #eab308;
+  color: black;
+  font-weight: bold;
+}
+
+.btn-delete {
+  background: white;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-delete:hover { background: #fee2e2; }
+
+.card-footer {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.btn-add {
+  background: white;
+  border: 2px solid var(--primary-green);
+  color: var(--primary-green);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-add:hover { background: #f0fdf4; }
+
+.footer-actions {
+  max-width: 900px;
+  margin: 30px auto;
+  text-align: right;
+}
+
+.btn-save {
+  background: var(--primary-green);
+  color: white;
+  padding: 12px 30px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(6, 78, 59, 0.3);
+  font-weight: bold;
+}
+.btn-save:hover { background: #065f46; transform: translateY(-1px); }
+
+/* NEW: Danger Zone for Delete Feature */
+.danger-zone {
+  border-left-color: #ef4444;
+  background-color: #fef2f2;
+  margin-top: 20px;
+}
+
+.btn-delete-customer {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.btn-delete-customer:hover {
+  background: #dc2626;
+}
+
+/* =========================================
+ TABLET & MOBILE RESPONSIVENESS
+ ========================================= */
+@media (max-width: 1024px) {
+.med-grid-header, .med-row { gap: 10px; grid-template-columns: 1.5fr 100px 1.5fr 0.8fr 0.8fr 0.5fr; }
+}
+
+@media (max-width: 768px) {
+.customer-badge { flex-wrap: wrap; justify-content: center; }
+.med-grid-header { display: none !important; }
+.med-row {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px;
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+.freq-group { justify-content: flex-start; }
+.footer-actions, .card-footer { display: flex; flex-direction: column; }
+.btn-save, .btn-add, .btn-delete-customer { width: 100%; text-align: center; }
+}
